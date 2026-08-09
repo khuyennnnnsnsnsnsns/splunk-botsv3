@@ -41,7 +41,7 @@ The system follows a Single-Instance (S1) Architecture as required by Splunk Ent
 │                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
 │   │                      BOTS v3 DATASET                                │   │
-│   │              (Pre-indexed .tgz file - 320 MB)                       │   │
+│   │                                                                     │   │
 │   └─────────────────────────────┬───────────────────────────────────────┘   │
 │                                  │                                          │
 │                                  ▼                                          │
@@ -52,8 +52,8 @@ The system follows a Single-Instance (S1) Architecture as required by Splunk Ent
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                     SPLUNK ENTERPRISE (FREE)                                 │
-│                      SINGLE-INSTANCE (S1) DEPLOYMENT                         │
+│                     SPLUNK ENTERPRISE                                        │
+│                                                                              │
 │                                                                              │
 │    ┌─────────────────────┐          ┌───────────────────────────────────┐    │
 │    │      INDEXER        │◄────────►│           SEARCH HEAD             │    │
