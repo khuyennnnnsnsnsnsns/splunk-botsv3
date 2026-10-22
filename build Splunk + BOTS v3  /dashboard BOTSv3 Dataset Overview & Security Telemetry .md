@@ -1,19 +1,19 @@
-BOTSv3 Dataset Overview & Security Telemetry
-Total BOTSv3 Events: 
+# BOTSv3 Dataset Overview & Security Telemetry
+## Total BOTSv3 Events: 
 index=botsv3
 | stats count
-Top Log Sources: 
+## Top Log Sources: 
 index=botsv3
 | stats count by sourcetype
 | sort 10 - count
-Event Volume over Time: 
+## Event Volume over Time: 
 index=botsv3
 | timechart span=1h count by sourcetype limit=8
-Top Active Endpoints / Hosts: 
+## Top Active Endpoints / Hosts: 
 index=botsv3 host=*
 | stats count by host
 | sort 10 - count
-Network Traffic & IDS Alerts: 
+## Network Traffic & IDS Alerts: 
 index=botsv3 src_ip=* dest_ip=*
 | stats count by src_ip, dest_ip, dest_port, sourcetype
 | sort 15 - count
