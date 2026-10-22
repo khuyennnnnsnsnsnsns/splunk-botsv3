@@ -1,0 +1,37 @@
+SOC Automation - MITRE ATT&CKSOC Automation - MITRE ATT&CK
+Panel 1: Overall MITRE Coverage: 
+index=main sourcetype="soc:mitre:json" event_type="overall"
+| stats latest(coverage_percentage) as percentage
+| eval percentage=percentage . "%"
+Panel 2: Coverage Status Breakdown:
+index=main sourcetype="soc:mitre:json" event_type="technique"
+| eventstats max(generated_at) as latest_generated_at
+| where generated_at=latest_generated_at
+| stats count by status
+Panel 3: MITRE ATT&CK Mapping Details: 
+index=main sourcetype="soc:mitre:json" event_type="technique"
+| eventstats max(generated_at) as latest_generated_at
+| where generated_at=latest_generated_at
+| table technique_id technique tactic status usecases
+| rename technique_id as "Technique ID",
+         technique as "Technique Name",
+         tactic as "Tactic",
+         status as "Status",
+         usecases as "Mapped Use Cases"
+Panel 4: Alerts Breakdown by Severity: 
+index=main sourcetype="soc:alert:json"
+| eval run_minute=substr(timestamp,1,16)
+| eventstats max(timestamp) as latest_timestamp
+| eval latest_run_minute=substr(latest_timestamp,1,16)
+| where run_minute=latest_run_minute
+| stats count by severity
+Panel 5 – Alerts by Detection Use Case: 
+index=main sourcetype="soc:alert:json"
+| eval run_minute=substr(timestamp,1,16)
+| eventstats max(timestamp) as latest_timestamp
+| eval latest_run_minute=substr(latest_timestamp,1,16)
+| where run_minute=latest_run_minute
+| stats count by usecase
+| sort -count
+| rename usecase as "Detection Use Case",
+         count as "Total Alerts"
