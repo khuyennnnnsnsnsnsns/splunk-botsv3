@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-# Thêm thư mục gốc dự án vào sys.path để chạy trực tiếp không bị lỗi import
 BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
@@ -10,7 +9,6 @@ import json
 from datetime import datetime
 from mitre.mitre_mapping import MITRE_MAPPING
 
-# Cấu hình đường dẫn
 LOG_DIR = BASE_DIR / "logs"
 OUTPUT_FILE = LOG_DIR / "mitre_coverage.json"
 
@@ -26,7 +24,6 @@ IMPLEMENTED_USECASES = {
     "windows_service",
     "account_manipulation"
 }
-# Tập kỹ thuật mục tiêu (Đã loại bỏ T1053 và T1068, bổ sung T1190)
 TARGET_TECHNIQUES = {
     # INITIAL ACCESS
     "T1190": {
