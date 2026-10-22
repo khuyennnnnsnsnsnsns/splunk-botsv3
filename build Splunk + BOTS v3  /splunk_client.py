@@ -48,9 +48,7 @@ class SplunkClient:
         ):
             cleaned_query = f"search {cleaned_query}"
 
-        # -------------------------------------------------
-        # STEP 1: Tạo search job và đợi search hoàn thành
-        # -------------------------------------------------
+       
         create_url = f"{self.base_url}/services/search/jobs"
 
         payload = {
@@ -79,9 +77,7 @@ class SplunkClient:
                 print("[ERROR] Splunk did not return a search SID")
                 return []
 
-            # -------------------------------------------------
-            # STEP 2: Lấy toàn bộ final results
-            # -------------------------------------------------
+           
             results_url = (
                 f"{self.base_url}/services/search/jobs/{sid}/results"
             )
