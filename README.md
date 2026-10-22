@@ -1,265 +1,537 @@
-# splunk-botsv3-threat-hunting
+# SOC Automation with Splunk, Python and MITRE ATT&CK
 
-# 📖 Description
-This project implements a comprehensive log analysis and threat detection system built on Splunk Enterprise Free for security monitoring and incident investigation. The system leverages the BOTS v3 (Boss of the SOC) dataset—a realistic cyber attack simulation developed by Splunk—to demonstrate practical security analytics capabilities in a controlled environment.
+A Security Operations Center (SOC) automation project that integrates **Splunk Enterprise**, **Python**, **MITRE ATT&CK**, and the **Boss of the SOC v3 (BOTSv3)** dataset to automate security event analysis, detection, alert normalization, and ATT&CK coverage evaluation.
 
-## Core Capabilities
-Centralized Log Management — Aggregates and normalizes log data from multiple sources including AWS CloudTrail, Office 365, Sysmon, and Zeek
+The project was developed as part of a graduation thesis focusing on building an automated workflow for detecting and analyzing cybersecurity events using SIEM data.
 
-Threat Detection — Implements 7+ detection use cases covering the complete cyber attack lifecycle
+---
 
-MITRE ATT&CK Integration — Maps detected threats to industry-standard tactics and techniques (T1046, T1110, T1136, T1068, T1003.001, T1071, T1021)
+## Overview
 
-Interactive Dashboards — Provides visual representations of security metrics and attack patterns
+Traditional SOC workflows often require analysts to manually execute searches, review security events, classify alerts, and map detected activities to security frameworks.
 
-Incident Investigation — Simulates professional SOC analyst workflows from detection through remediation
+This project automates part of that process by using Python to communicate with Splunk through the REST API, execute multiple detection use cases, normalize detection results, and map them to the MITRE ATT&CK framework.
+
+The overall workflow is:
+
+```text
+BOTSv3 Dataset
+      |
+      v
+Splunk Enterprise
+(index=botsv3)
+      |
+      | Splunk REST API
+      v
+Python Orchestrator
+      |
+      v
+Detection Engine
+      |
+      v
+Alert Manager
+      |
+      v
+MITRE ATT&CK Mapping
+      |
+      v
+Normalized Alerts / Coverage Reports
+      |
+      v
+Splunk Visualization
+```
+
+---
+
+## Objectives
+
+The main objectives of this project are:
+
+- Centralize BOTSv3 security telemetry in Splunk Enterprise.
+- Automate detection queries using Python.
+- Implement multiple SOC detection use cases.
+- Normalize detection results into a consistent alert format.
+- Map detection capabilities to MITRE ATT&CK techniques.
+- Evaluate ATT&CK coverage within the selected detection scope.
+- Export detection and ATT&CK coverage results for further analysis.
+- Support visualization and investigation in Splunk.
+
+---
+
+## Technologies
+
+The project uses:
+
+- **Splunk Enterprise**
+- **Python**
+- **Splunk REST API**
+- **MITRE ATT&CK**
+- **Boss of the SOC v3 (BOTSv3)**
+- **SPL – Search Processing Language**
+- **JSON / JSONL**
+- Windows Event Logs
+- Sysmon
+- Network telemetry
+- Suricata
+
+---
+
+## Project Architecture
+
+The system consists of several main components.
+
+### Splunk Enterprise
+
+Splunk stores and processes telemetry from the BOTSv3 dataset.
+
+The primary dataset is queried from:
+
+```text
+index=botsv3
+```
+
+Splunk is responsible for:
+
+- Event storage
+- SPL execution
+- Security telemetry analysis
+- Detection data retrieval
+- Dashboard visualization
+
+---
+
+### Python Orchestrator
+
+`main.py` acts as the main orchestrator of the project.
+
+It coordinates the execution of detection modules and manages the overall detection workflow.
+
+```text
+main.py
+   |
+   +-- Brute Force Detection
+   +-- Reconnaissance Detection
+   +-- C2 Detection
+   +-- PowerShell Detection
+   +-- Process Creation Detection
+   +-- DNS Detection
+   +-- HTTP Detection
+   +-- Suricata Detection
+   +-- Windows Service Detection
+   +-- Account Manipulation Detection
+```
+
+---
+
+### Splunk Client
+
+`splunk_client.py` handles communication between Python and Splunk Enterprise through the Splunk REST API.
+
+The final implementation uses Splunk search jobs with blocking execution and retrieves the complete search results using the generated Search ID (`SID`).
+
+Conceptually:
+
+```text
+Python
+   |
+   | POST /services/search/jobs
+   | exec_mode=blocking
+   v
+Splunk Search Job
+   |
+   | SID
+   v
+GET /services/search/jobs/{sid}/results
+   |
+   | output_mode=json
+   | count=0
+   v
+Complete Search Results
+```
+
+This approach ensures that the detection modules process finalized Splunk search results rather than intermediate streaming results.
+
+---
+
+## Detection Use Cases
+
+The current version implements **10 detection use cases**.
+
+| # | Detection Module | Security Activity | MITRE ATT&CK |
+|---|---|---|---|
+| 1 | `brute_force.py` | Brute Force | T1110 |
+| 2 | `recon.py` | Network Service Scanning | T1046 |
+| 3 | `c2.py` | Command and Control | T1071.001 |
+| 4 | `powershell.py` | PowerShell Execution | T1059.001 |
+| 5 | `process_creation.py` | Command / Process Execution | T1059 |
+| 6 | `dns_detection.py` | DNS-based C2 Activity | T1071.004 |
+| 7 | `http_detection.py` | HTTP-based C2 Activity | T1071.001 |
+| 8 | `suricata.py` | Exploit / Network Detection | T1190 |
+| 9 | `windows_service.py` | Windows Service Persistence | T1543.003 |
+| 10 | `account_manipulation.py` | Account Manipulation | T1098 |
+
+---
+
+## MITRE ATT&CK Coverage
+
+The project defines a selected ATT&CK target set consisting of **11 techniques/sub-techniques**:
+
+```text
+T1190       Exploit Public-Facing Application
+
+T1059       Command and Scripting Interpreter
+T1059.001   PowerShell
+
+T1110       Brute Force
+T1110.003   Password Spraying
+
+T1046       Network Service Scanning
+
+T1071       Application Layer Protocol
+T1071.001   Web Protocols
+T1071.004   DNS
+
+T1543.003   Windows Service
+
+T1098       Account Manipulation
+```
+
+The implemented detection modules currently cover:
+
+```text
+10 / 11 selected techniques
+```
+
+Resulting in:
+
+```text
+MITRE ATT&CK target-set coverage: 90.91%
+```
+
+The uncovered technique in the current version is:
+
+```text
+T1110.003 – Password Spraying
+```
+
+> **Note:** The 90.91% value represents coverage of the project's selected 11-technique target set. It does not represent coverage of the entire MITRE ATT&CK framework.
+
+---
+
+## Experimental Results
+
+During the final experiment, the system produced **683 normalized detection records**.
+
+| Detection | Severity | Records |
+|---|---:|---:|
+| Command and Control | HIGH | 664 |
+| Reconnaissance | MEDIUM | 10 |
+| HTTP Detection | MEDIUM | 5 |
+| Windows Service | MEDIUM | 2 |
+| Account Manipulation | MEDIUM | 2 |
+| Brute Force | - | 0 |
+| PowerShell | - | 0 |
+| Process Creation | - | 0 |
+| DNS Detection | - | 0 |
+| Suricata | - | 0 |
+
+### Severity Distribution
+
+```text
+HIGH    : 664
+MEDIUM  : 19
+LOW     : 0
+TOTAL   : 683
+```
+
+Command-and-Control candidates accounted for approximately:
+
+```text
+97.22%
+```
+
+of the generated normalized detection records.
+
+> These records should be interpreted as **detection candidates / normalized alert records**, not as 683 confirmed cyberattacks. Detection results still require analyst validation and contextual investigation.
+
+---
+
+## Project Structure
+
+```text
+soc_automation/
+│
+├── alerts/
+│   ├── __init__.py
+│   └── alert_manager.py
+│
+├── mitre/
+│   ├── __init__.py
+│   ├── attack_matrix.py
+│   ├── mitre_exporter.py
+│   └── mitre_mapping.py
+│
+├── usecases/
+│   ├── __init__.py
+│   ├── account_manipulation.py
+│   ├── brute_force.py
+│   ├── c2.py
+│   ├── dns_detection.py
+│   ├── http_detection.py
+│   ├── powershell.py
+│   ├── process_creation.py
+│   ├── recon.py
+│   ├── suricata.py
+│   └── windows_service.py
+│
+├── logs/
+│   └── .gitkeep
+│
+├── config.py
+├── main.py
+├── splunk_client.py
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+---
+
+## Component Description
+
+### `main.py`
+
+Main program responsible for coordinating all detection modules.
+
+### `splunk_client.py`
+
+Provides the communication layer between Python and the Splunk REST API.
+
+### `config.py`
+
+Contains the project configuration such as:
+
+- Splunk host
+- Management port
+- Connection scheme
+- Splunk index
+- Search time range
+- Output paths
+
+Sensitive credentials should not be committed to a public repository.
+
+### `usecases/`
+
+Contains the individual SOC detection modules.
+
+Each module performs a specific security detection function using Splunk search results.
+
+### `alerts/alert_manager.py`
+
+Normalizes results generated by different detection modules into a common alert structure.
+
+### `mitre/mitre_mapping.py`
+
+Maps detection use cases to MITRE ATT&CK techniques and tactics.
+
+### `mitre/attack_matrix.py`
+
+Defines the ATT&CK techniques included in the project's selected detection coverage scope.
+
+### `mitre/mitre_exporter.py`
+
+Generates MITRE ATT&CK coverage reports and exports the results for further processing and visualization.
+
+---
+
+## Output Files
+
+During execution, the project can generate files such as:
+
+```text
+logs/detection.log
+logs/normalized_alerts.jsonl
+logs/mitre_coverage.json
+logs/mitre_coverage.jsonl
+```
+
+These runtime-generated files are excluded from Git tracking through `.gitignore`.
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/khuyennnnnsnsnsnsns/SOC-Automation-Splunk-BOTSv3.git
+```
+
+Move into the project directory:
+
+```bash
+cd SOC-Automation-Splunk-BOTSv3
+```
+
+Create a Python virtual environment:
+
+```bash
+python3 -m venv venv
+```
+
+Activate it:
+
+```bash
+source venv/bin/activate
+```
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Splunk Configuration
+
+The project requires a running Splunk Enterprise instance.
+
+Example configuration:
+
+```text
+Splunk Management API:
+https://127.0.0.1:8089
+
+Dataset index:
+botsv3
+```
+
+Configure the appropriate Splunk connection settings in the project before execution.
+
+For security reasons:
+
+- Do not commit real passwords.
+- Do not commit API tokens.
+- Do not store production credentials directly in a public repository.
+- Environment variables or another secure secret-management method should be used for sensitive information.
+
+---
+
+## Running the Project
+
+After Splunk is running and the BOTSv3 dataset has been indexed, execute:
+
+```bash
+python3 main.py
+```
+
+The orchestrator will execute the configured detection use cases and generate normalized detection results.
+
+---
+
+## Detection Workflow
+
+A simplified detection workflow is:
+
+```text
+1. BOTSv3 telemetry is stored in Splunk
+              |
+              v
+2. Python sends SPL searches through the Splunk REST API
+              |
+              v
+3. Splunk executes the search
+              |
+              v
+4. Python retrieves finalized results
+              |
+              v
+5. Detection modules analyze the results
+              |
+              v
+6. Alert Manager normalizes detection records
+              |
+              v
+7. MITRE ATT&CK techniques are assigned
+              |
+              v
+8. ATT&CK coverage is calculated
+              |
+              v
+9. JSON / JSONL reports are generated
+              |
+              v
+10. Results can be re-ingested into Splunk for visualization
+```
+
+---
 
 ## Key Features
 
-Feature	Description
-
-SIEM Platform	Splunk Enterprise Free (Single-Instance)
-
-Attack Dataset	BOTS v3 (320 MB, pre-indexed)
-
-Detection Use Cases	7+ rules covering Reconnaissance, Brute Force, Persistence, Privilege Escalation, Credential Dumping, C2, and Lateral Movement
-
-Threat Intelligence	MITRE ATT&CK Framework v15
-
-Query Language	SPL (Search Processing Language)
-
-Visualization	Custom Dashboards & Reports
-
-# 🏗️ System Architecture
-# Overview
-The system follows a Single-Instance (S1) Architecture as required by Splunk Enterprise Free limitations. All core components—Indexer, Search Head, and Forwarder—run on a single machine, making it ideal for academic research and proof-of-concept deployments.
-
-# Architecture Diagram
-<pre>
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                         DATA SOURCE LAYER                                   │
-│                                                                             │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                      BOTS v3 DATASET                                │   │
-│   │                                                                     │   │
-│   └─────────────────────────────┬───────────────────────────────────────┘   │
-│                                  │                                          │
-│                                  ▼                                          │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                      SPLUNK APP BOTS v3                             │   │
-│   └─────────────────────────────┬───────────────────────────────────────┘   │
-└────────────────────────────────┼────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                     SPLUNK ENTERPRISE                                        │
-│                                                                              │
-│                                                                              │
-│    ┌─────────────────────┐          ┌───────────────────────────────────┐    │
-│    │      INDEXER        │◄────────►│           SEARCH HEAD             │    │
-│    │  Data Processing &  │          │    SPL Execution & Web UI         │    │
-│    │    Storage          │          │                                   │    │
-│    └─────────────────────┘          └───────────────┬───────────────────┘    │
-│                                                      │                       │
-└──────────────────────────────────────────────────────┼───────────────────────┘
-                                                       │
-                                                       ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                  THREAT DETECTION & MITRE ATT&CK MAPPING                     │
-│                                                                              │
-│   ┌───────────────┐   ┌───────────────┐   ┌───────────────┐   ┌─────────┐    │
-│   │  RECONNAISSANCE│  │    BRUTE      │   │  PERSISTENCE  │   │   C2    │    │
-│   │  (T1046)      │   │  FORCE (T1110)│   │  (T1136)      │   │ (T1071) │    │
-│   └───────────────┘   └───────────────┘   └───────────────┘   └─────────┘    │
-│                                                                              │
-│   ┌───────────────┐   ┌───────────────┐   ┌─────────────────────────────┐    │
-│   │   PRIVILEGE   │   │    LSASS      │   │   LATERAL MOVEMENT          │    │
-│   │  ESCALATION   │   │  (T1003.001)  │   │   (T1021)                   │    │
-│   │  (T1068)      │   │               │   │                             │    │
-│   └───────────────┘   └───────────────┘   └─────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────────────────────┘
-                                                       │
-                                                       ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                            OUTPUT LAYER                                      │
-│                                                                              │
-│   ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────────────┐    │
-│   │    DASHBOARD    │   │    REPORTS      │   │   MITRE MAPPING TABLE   │    │
-│   └─────────────────┘   └─────────────────┘   └─────────────────────────┘    │
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐    │
-│   │                   ADMIN / USER (Security Analyst)                   │    │
-│   └─────────────────────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────────────────────┘
-</pre>
-# Component Breakdown
+- Automated Splunk detection execution
+- Modular detection architecture
+- Centralized alert normalization
+- MITRE ATT&CK technique mapping
+- ATT&CK target-set coverage calculation
+- JSON and JSONL reporting
+- SOC-oriented security analytics
+- BOTSv3-based experimental environment
+- Extensible Python detection modules
 
-Component	Role	Description
+---
 
-BOTS v3 Dataset	Data Source	Pre-indexed dataset simulating multi-stage APT attacks in hybrid cloud environments
+## Limitations
 
-Splunk App BOTS v3	Application	Packages dataset and configurations for seamless deployment
+The current implementation has several limitations.
 
-Splunk Enterprise (Free)	Core Platform	SIEM platform with 500 MB/day ingestion limit
+First, the detection rules are evaluated using the BOTSv3 dataset and therefore do not represent all possible behaviors that may occur in a production environment.
 
-Indexer	Processing Engine	Processes, indexes, and stores log data for fast retrieval
+Second, some detection rules rely on heuristic conditions. A generated alert should therefore be treated as a candidate for investigation rather than definitive proof of malicious activity.
 
-Search Head	User Interface	Provides web interface for SPL queries and visualization
+Third, MITRE ATT&CK coverage is calculated only against the project's selected set of 11 techniques and should not be interpreted as coverage of the complete ATT&CK Enterprise matrix.
 
-MITRE Mapping	Analytical Layer	Maps detections to MITRE ATT&CK Framework
+Finally, the current project focuses primarily on detection and analysis rather than full incident response orchestration.
 
-Dashboard/Reports	Output	Visual representations of security findings
+---
 
-# Technical Specifications
+## Future Development
 
-Specification	Minimum	Recommended
+Possible improvements include:
 
-Architecture	Single-Instance	Single-Instance
+- Implement T1110.003 Password Spraying detection.
+- Add additional MITRE ATT&CK techniques.
+- Improve detection correlation between multiple telemetry sources.
+- Add automated risk scoring.
+- Reduce false positives through behavioral baselining.
+- Add automated response workflows.
+- Integrate threat intelligence feeds.
+- Add additional Splunk dashboards.
+- Expand the system to support real-time SOC environments.
+- Evaluate the detection logic on additional datasets.
 
-Splunk Version	9.0+	9.2+
+---
 
-OS	Linux/Windows	Rocky Linux 9
+## Academic Context
 
-RAM	8 GB	12 GB
+This project was developed as a graduation thesis in the field of **Information Security**.
 
-CPU	4 cores	8 cores
+The research focuses on applying SIEM, automation, and the MITRE ATT&CK framework to build a practical SOC-oriented security detection workflow.
 
-Storage	20 GB	100 GB+
+---
 
-Ingestion Limit	500 MB/day	N/A
+## Disclaimer
 
-# Data Flow
+This project is intended for:
 
-Ingestion — BOTS v3 dataset installed as Splunk App (bypasses 500 MB/day limit)
+- Educational purposes
+- Cybersecurity research
+- SOC training
+- Defensive security experimentation
 
-Processing — Indexer processes and stores data
+The BOTSv3 dataset and detection results are used within a controlled security analysis environment.
 
-Analysis — Security analyst runs SPL queries for threat detection
 
-Mapping — Detected events mapped to MITRE ATT&CK
+---
 
-Visualization — Results displayed in dashboards and reports
-
-Investigation — Complete incident response workflow simulation
-
-# 💻 Skills & Technologies
-## Technical Skills
-
-Category	Skills
-
-SIEM Platforms	Splunk Enterprise (Installation, Configuration, Administration)
-
-Query Languages	SPL (Search Processing Language)
-
-Threat Intelligence	MITRE ATT&CK Framework
-
-Security Analysis	Log Analysis, Threat Hunting, Incident Investigation
-
-Data Analytics	Statistical Analysis, Pattern Recognition, Anomaly Detection
-
-Visualization	Dashboard Design, Report Generation
-
-# Security Domains Covered
-
-Domain	Description
-
-SOC Operations	Security Operations Center workflows and procedures
-
-Incident Response	Detection, investigation, and remediation processes
-
-Threat Detection	Use case development and implementation
-
-Log Management	Aggregation, normalization, and analysis
-
-Cloud Security	AWS CloudTrail and Office 365 log analysis
-
-Endpoint Security	Sysmon and Windows Event Log analysis
-
-Network Security	Zeek network traffic analysis
-
-## Tools & Technologies
-
-Tool/Technology	Purpose
-
-Splunk Enterprise 9.2+	Core SIEM platform
-
-SPL	Search and analysis queries
-
-BOTS v3	Attack simulation dataset
-
-MITRE ATT&CK	Threat intelligence framework
-
-Rocky Linux 9	Operating system
-
-Docker	Optional containerization
-
-## Knowledge Areas
-
-✅ Security Information and Event Management (SIEM)
-
-✅ Cyber Attack Lifecycle & Kill Chain
-
-✅ Log Analysis & Forensics
-
-✅ Threat Intelligence & Contextualization
-
-✅ Security Monitoring & Alerting
-
-✅ Incident Response Procedures
-
-✅ Cloud Security Monitoring
-
-✅ Network Traffic Analysis
-
-# 📁 Project Structure
-<pre>
-splunk-botsv3-analysis/
-├── README.md                    # Project documentation
-├── LICENSE                      # MIT License
-├── .gitignore                   # Git ignore rules
-├── docs/
-│   ├── diagrams/                # Architecture diagrams
-│   │   ├── architecture.png
-│   │   └── mitre_mapping.png
-│   └── report/                  # Thesis documentation
-│       ├── thesis_vietnamese.pdf
-│       └── thesis_english.pdf
-├── splunk/
-│   ├── queries/                 # SPL query library
-│   │   ├── 01_reconnaissance.md
-│   │   ├── 02_brute_force.md
-│   │   ├── 03_persistence.md
-│   │   ├── 04_privilege_escalation.md
-│   │   ├── 05_credential_dumping.md
-│   │   ├── 06_command_and_control.md
-│   │   └── 07_lateral_movement.md
-│   ├── dashboards/              # Dashboard configurations
-│   │   └── dashboard_config.xml
-│   └── addons/                  # Required Splunk Add-ons
-│       └── addon_list.txt
-├── results/                     # Analysis outputs
-│   ├── findings.csv
-│   ├── statistics.md
-│   └── incident_case_study.md
-└── scripts/                     # Automation scripts
-    ├── install_splunk.sh
-    └── load_bots_data.sh
-</pre>
-
-# 🔧 MITRE ATT&CK Use Cases
-#	Tactic	Technique	ID	Query Focus
-
-1	Reconnaissance	Network Service Scanning	T1046	Port scanning detection
-
-2	Credential Access	Brute Force	T1110	Failed login analysis
-
-3	Persistence	Create Account	T1136	New user account detection
-
-4	Privilege Escalation	Exploitation for Privilege Escalation	T1068	Privilege escalation detection
-
-5	Credential Access	OS Credential Dumping	T1003.001	LSASS process access
-
-6	Command & Control	Application Layer Protocol	T1071	DNS tunneling detection
-
-7	Lateral Movement	Remote Services	T1021	Cross-segment movement detection
-
+If you find this project useful for SOC research or cybersecurity learning, feel free to explore the detection modules and extend the existing use cases.
