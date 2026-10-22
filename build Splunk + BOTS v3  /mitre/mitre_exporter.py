@@ -10,7 +10,6 @@ OUTPUT_FILE = LOG_DIR / "mitre_coverage.jsonl"
 def export_mitre_coverage():
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Nếu chưa có file JSON đầu vào, tự động khởi tạo báo cáo
     if not INPUT_FILE.exists():
         report = build_report()
         save_report(report)
@@ -23,7 +22,6 @@ def export_mitre_coverage():
 
     events = []
 
-    # Overall coverage event
     events.append({
         "event_type": "overall",
         "project": "SOC Automation",
@@ -34,7 +32,6 @@ def export_mitre_coverage():
         "coverage_percentage": overall["percentage"]
     })
 
-    # Tactic coverage events
     for tactic, values in data["tactics"].items():
         events.append({
             "event_type": "tactic",
@@ -47,7 +44,6 @@ def export_mitre_coverage():
             "coverage_percentage": values["percentage"]
         })
 
-    # Technique coverage events
     for technique in data["techniques"]:
         events.append({
             "event_type": "technique",
