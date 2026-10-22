@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+
+# Runtime logs and generated data
+logs/*.log
+logs/*.json
+logs/*.jsonl
+
+# Backup folders
+logs/backup_before_final/
+logs/backup_before_oneshot/
+backup*/
+
+# Experiment outputs
+outputmain_final.txt
+outputmain_oneshot.txt
+outputmain*.txt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
