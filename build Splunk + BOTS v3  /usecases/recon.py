@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-# Thêm thư mục gốc vào sys.path để chạy độc lập không bị lỗi import
 BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.append(str(BASE_DIR))
@@ -42,7 +41,6 @@ def detect():
 
     return len(results)
 
-# Alias để tương thích khi gọi run() hoặc detect()
 run = detect
 
 if __name__ == "__main__":
