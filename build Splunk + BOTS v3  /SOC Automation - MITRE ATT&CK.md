@@ -1,14 +1,14 @@
-SOC Automation - MITRE ATT&CKSOC Automation - MITRE ATT&CK
-Panel 1: Overall MITRE Coverage: 
+# SOC Automation - MITRE ATT&CKSOC Automation - MITRE ATT&CK
+# Panel 1: Overall MITRE Coverage: 
 index=main sourcetype="soc:mitre:json" event_type="overall"
 | stats latest(coverage_percentage) as percentage
 | eval percentage=percentage . "%"
-Panel 2: Coverage Status Breakdown:
+# Panel 2: Coverage Status Breakdown:
 index=main sourcetype="soc:mitre:json" event_type="technique"
 | eventstats max(generated_at) as latest_generated_at
 | where generated_at=latest_generated_at
 | stats count by status
-Panel 3: MITRE ATT&CK Mapping Details: 
+# Panel 3: MITRE ATT&CK Mapping Details: 
 index=main sourcetype="soc:mitre:json" event_type="technique"
 | eventstats max(generated_at) as latest_generated_at
 | where generated_at=latest_generated_at
@@ -18,14 +18,14 @@ index=main sourcetype="soc:mitre:json" event_type="technique"
          tactic as "Tactic",
          status as "Status",
          usecases as "Mapped Use Cases"
-Panel 4: Alerts Breakdown by Severity: 
+# Panel 4: Alerts Breakdown by Severity: 
 index=main sourcetype="soc:alert:json"
 | eval run_minute=substr(timestamp,1,16)
 | eventstats max(timestamp) as latest_timestamp
 | eval latest_run_minute=substr(latest_timestamp,1,16)
 | where run_minute=latest_run_minute
 | stats count by severity
-Panel 5 – Alerts by Detection Use Case: 
+# Panel 5 – Alerts by Detection Use Case: 
 index=main sourcetype="soc:alert:json"
 | eval run_minute=substr(timestamp,1,16)
 | eventstats max(timestamp) as latest_timestamp
